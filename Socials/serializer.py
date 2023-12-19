@@ -51,3 +51,22 @@ class FullBlogSerializer(serializers.ModelSerializer):
         fields = ['id','title','content','author','likes_count']
     def get_likes_count(self, obj):
         return obj.likes_count()
+
+
+from rest_framework import serializers
+from .models import HelpCenter, HelpCenterComment
+
+class HelpCenterSerializer(serializers.ModelSerializer):
+    user = CustomUserSerialiser()
+
+    class Meta:
+        model = HelpCenter
+        fields = ['prob_id', 'user', 'problem', 'date']
+        read_only_fields = ['prob_id', 'user', 'date']
+
+class HelpCenterCommentSerializer(serializers.ModelSerializer):
+    user = CustomUserSerialiser()
+    class Meta:
+        model = HelpCenterComment
+        fields = ['id','user', 'problem', 'comment']
+        read_only_fields = ['user']

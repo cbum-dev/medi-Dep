@@ -15,11 +15,6 @@ class BlogCreate(generics.CreateAPIView):
         user = self.request.user
         serializer.save(author=user)
 
-class BlogUpdate(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Blog.objects.all()                                                                                           
-    serializer_class = BlogUpdateSerializer
-    permission_classes = [IsAuthenticated,IsOwner]
-
 class IsOwnerOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request,
@@ -29,6 +24,16 @@ class IsOwnerOrReadOnly(BasePermission):
 
         # Write permissions are only allowed to the owner of the blog.
         return obj.author == request.user
+
+class IsOwnerOrReadOnlyForComments(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD, or OPTIONS requests.
+        if request.method in ["GET", "HEAD", "OPTIONS"]:
+            return True
+
+        # Write permissions are only allowed to the owner of the blog.
+        return obj.user == request.user
 
 class BlogView(viewsets.ModelViewSet):
     queryset = Blog.objects.all()
@@ -59,3 +64,36 @@ class BlogLike(generics.CreateAPIView):
     def perform_create(self, serializer):
         # Set the user from the JWT
         serializer.save(user=self.request.user, blog_id=self.kwargs['blog_id'])
+
+from rest_framework import generics
+from .models import HelpCenter, HelpCenterComment
+from .serializer import HelpCenterSerializer, HelpCenterCommentSerializer
+from rest_framework.permissions import IsAuthenticated
+
+class HelpCenterListCreateView(generics.ListCreateAPIView):
+    queryset = HelpCenter.objects.all()
+    serializer_class = HelpCenterSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class HelpCenterDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = HelpCenter.objects.all()
+    serializer_class = HelpCenterSerializer
+    permission_classes = [IsAuthenticated,IsOwnerOrReadOnlyForComments]
+
+class HelpCenterCommentListCreateView(generics.ListCreateAPIView):
+    queryset = HelpCenterComment.objects.all()
+    serializer_class = HelpCenterCommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        help_center_id = self.kwargs['help_center_id']
+        help_center = HelpCenter.objects.get(prob_id=help_center_id)
+        serializer.save(user=self.request.user, problem=help_center)
+
+class HelpCenterCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = HelpCenterComment.objects.all()
+    serializer_class = HelpCenterCommentSerializer
+    permission_classes = [IsAuthenticated,IsOwnerOrReadOnlyForComments]

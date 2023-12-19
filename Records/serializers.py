@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Appointment,HealthcareRecord
+from .models import Appointment,HealthcareReport
 from Accounts.models import User,HealthcareProvider
 
 class UserSerializer(serializers.ModelSerializer):
@@ -42,6 +42,7 @@ class AppointmentRescheduleSerializer(serializers.Serializer):
 class HealthCareRecordSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     healthcare_provider = ProviderSerializers()
+    appointment = AppointmentSerializer()
     class Meta:
-        model = HealthcareRecord
+        model = HealthcareReport
         fields = "__all__"

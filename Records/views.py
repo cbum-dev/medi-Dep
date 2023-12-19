@@ -1,5 +1,5 @@
 from rest_framework import generics
-from .models import Appointment, HealthcareRecord
+from .models import Appointment, HealthcareReport
 from .serializers import (
     AppointmentSerializer,
     BookAppSerializer,
@@ -13,6 +13,7 @@ from django.core.mail import send_mail
 class AppointmentListCreateView(generics.ListCreateAPIView):
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         appointment = serializer.save()
@@ -111,5 +112,5 @@ class AppointmentRescheduleView(generics.UpdateAPIView):
 
 
 class RecordsView(generics.ListCreateAPIView):
-    queryset = HealthcareRecord.objects.all()
+    queryset = HealthcareReport.objects.all()
     serializer_class = HealthCareRecordSerializer
