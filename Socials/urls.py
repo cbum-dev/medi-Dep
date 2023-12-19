@@ -7,7 +7,6 @@ router.register(r'blogs', BlogView, basename='blog')
 urlpatterns = [
     path('blogs/create/',BlogCreate.as_view(),name="blogs") ,
     path('', include(router.urls)),
-    path('update/<int:pk>/',BlogUpdate.as_view()),
     path('full/<int:pk>/',FullBlog.as_view()),
     path('like/<int:blog_id>/',BlogLike.as_view()),
 

@@ -8,10 +8,11 @@ urlpatterns = [
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('check/', views.check_user_role, name='check_user_role'),
-    path('providers/speciality/<int:specialty_id>/', views.HealthcareProviderBySpecialtyView.as_view(), name='providers-by-specialty'),    path('users/', views.UserListCreateView.as_view(), name='user-list-create'),
+    path('providers/speciality/<int:specialty_id>/', views.HealthcareProviderBySpecialtyView.as_view(), name='providers-by-specialty'),
+    path('users/', views.UserListCreateView.as_view(), name='user-list-create'),
     path('providers/', views.HealthcareProviderListCreateView.as_view(), name='provider-list'),
     path('providers/<int:pk>/', views.HealthcareProviderListCreateView.as_view(), name='provider-detail'),
-
+    path('current-user/', views.current_user, name='current_user'),
 
     path('register/user/', views.UserRegistrationView.as_view(), name='user-register'),
     path('register/user/basic/', views.BasicUserRegistration.as_view(), name='user-register'),

@@ -19,6 +19,7 @@ class CustomUser(AbstractUser):
         super().save(*args, **kwargs)
 class Specialty(models.Model):
     name = models.CharField(max_length=100)
+    desc = models.TextField(default = ' ')
     
     def __str__(self):
         return self.name
@@ -32,12 +33,13 @@ class HealthcareProvider(models.Model):
     phone = models.CharField(max_length=15,unique=True,null=False)
     address = models.CharField(max_length=100,null=False,default="Not Specified.")
     speciality = models.ManyToManyField(Specialty)
-
+    fees = models.IntegerField(default = 1200)
 
 class User(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
     name = models.CharField(max_length=100,null=False)
     phone = models.CharField(max_length=15,null=False,unique=True)
+    about = models.TextField(default = " ")
 
 
 

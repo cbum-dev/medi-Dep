@@ -213,3 +213,12 @@ class SpecialityView(APIView):
         specialties = Specialty.objects.all()
         serializer = SpecialtySerializer(specialties, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def current_user(request):
+    user_id = request.user.id
+    return Response({'user_id': user_id})
