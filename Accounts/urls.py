@@ -13,7 +13,7 @@ urlpatterns = [
     path('providers/', views.HealthcareProviderListCreateView.as_view(), name='provider-list'),
     path('providers/<int:pk>/', views.HealthcareProviderListCreateView.as_view(), name='provider-detail'),
     path('current-user/', views.current_user, name='current_user'),
-
+    path('retrieve-user/', views.RetrieveUserIdView.as_view(), name='retrieve-user-id'),
     path('register/user/', views.UserRegistrationView.as_view(), name='user-register'),
     path('register/user/basic/', views.BasicUserRegistration.as_view(), name='user-register'),
     path('register/provider/', views.ProviderRegistration.as_view(), name='healthcare-provider-register'),

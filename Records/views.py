@@ -1,4 +1,4 @@
-from rest_framework import generics
+from rest_framework import generics,serializers,permissions
 from .models import Appointment, HealthcareReport
 from .serializers import (
     AppointmentSerializer,
@@ -9,7 +9,7 @@ from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
 from django.core.mail import send_mail
 
-
+from rest_framework.exceptions import ValidationError
 class AppointmentListCreateView(generics.ListCreateAPIView):
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
@@ -31,7 +31,7 @@ class UserAppointmentsListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user.user
-        print(user)
+        print(user.user)
         return Appointment.objects.filter(user=user)
 
 
@@ -58,30 +58,43 @@ class ProviderAppointmentsView(generics.ListAPIView):
         return Appointment.objects.filter(healthcare_provider=provider)
 
 from django.conf import settings
+
+
 class AppointmentCreateView(generics.CreateAPIView):
     serializer_class = BookAppSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         user = self.request.user.user
+        healthcare_provider = serializer.validated_data['healthcare_provider'].user
+        print(user,healthcare_provider,user.user)
+        # Check if the user and healthcare_provider are the same CustomUser
+        if user.user == healthcare_provider:
+            raise serializers.ValidationError("User and healthcare provider cannot be the same.")
+
+        # Continue with the appointment creation if the user and healthcare_provider are different
         appointment = serializer.save(user=user)
+
+        # Send confirmation email
         subject = "Appointment Confirmation"
         message = f"Your appointment with {appointment.healthcare_provider.name} on {appointment.appointment_datetime} has been booked successfully."
-        from_email =  settings.EMAIL_HOST_USER# Your email address
-        recipient_list = [
-            self.request.user.email , 
-        ]  # User's email address
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [self.request.user.email]
         send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 
 
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from .models import Appointment
-from .serializers import AppointmentRescheduleSerializer
+from .serializers import AppointmentRescheduleSerializer,HealthCareCreateRecordSerializer
 from rest_framework import status
 from rest_framework.response import Response
 
-
+from django.shortcuts import get_object_or_404
 class AppointmentRescheduleView(generics.UpdateAPIView):
     queryset = Appointment.objects.all()
     serializer_class = AppointmentRescheduleSerializer
@@ -111,6 +124,37 @@ class AppointmentRescheduleView(generics.UpdateAPIView):
         return Response({"detail": "Appointment rescheduled successfully."})
 
 
-class RecordsView(generics.ListCreateAPIView):
-    queryset = HealthcareReport.objects.all()
+
+class RecordsView(generics.ListAPIView):
+    # queryset = HealthcareReport.objects.all()
     serializer_class = HealthCareRecordSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return HealthcareReport.objects.filter(user=self.request.user.id)
+class RecordsViewForProvider(generics.ListAPIView):
+    # queryset = HealthcareReport.objects.all()
+    serializer_class = HealthCareRecordSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return HealthcareReport.objects.filter(healthcare_provider=self.request.user.id)
+
+class CreateRecordView(generics.CreateAPIView):
+    queryset = HealthcareReport.objects.all()
+    serializer_class = HealthCareCreateRecordSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Extract appointment_id from the URL
+        appointment_id = self.kwargs.get('appointment_id')
+        
+        # Retrieve the appointment object
+        appointment = get_object_or_404(Appointment, pk=appointment_id)
+
+        # Additional validation: Only allow providers to create records for their appointments
+        if appointment.healthcare_provider.user.id == self.request.user.id:
+            # Set the user from the associated appointment
+            serializer.save(healthcare_provider = appointment.healthcare_provider,user=appointment.user, appointment=appointment)
+        else:
+            raise serializers.ValidationError("Only providers can create health records for their appointments.")

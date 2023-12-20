@@ -222,3 +222,23 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 def current_user(request):
     user_id = request.user.id
     return Response({'user_id': user_id})
+
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from .models import CustomUser, User
+from .serializers import UserSerializer
+
+class RetrieveUserIdView(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        # Retrieve the User associated with the authenticated CustomUser
+        custom_user = self.request.user
+        user = User.objects.get(user=custom_user)
+        return user
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)

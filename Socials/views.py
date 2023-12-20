@@ -115,10 +115,22 @@ class HelpCenterCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
 class ChatRoomList(generics.ListCreateAPIView):
     queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 class MessageList(generics.ListAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageViewSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        chatroom_id = self.kwargs.get('chatroom_id')
+
+        if chatroom_id:
+            # If chatroom_id is provided, return only the messages for that chat room
+            return Message.objects.filter(chat_room_id=chatroom_id).order_by('-id')
+        else:
+            # If no chatroom_id is provided, return all messages
+            return Message.objects.all()
 
 class MessageDetail(generics.CreateAPIView):
     queryset = Message.objects.all()

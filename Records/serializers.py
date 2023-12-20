@@ -40,9 +40,17 @@ class AppointmentRescheduleSerializer(serializers.Serializer):
     new_appointment_datetime = serializers.DateTimeField()
 
 class HealthCareRecordSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    # user = UserSerializer()
     healthcare_provider = ProviderSerializers()
     appointment = AppointmentSerializer()
     class Meta:
         model = HealthcareReport
         fields = "__all__"
+class HealthCareCreateRecordSerializer(serializers.ModelSerializer):
+    # user = UserSerializer()
+    # healthcare_provider = ProviderSerializers()
+    # appointment = AppointmentSerializer()
+    class Meta:
+        model = HealthcareReport
+        fields = "__all__"
+        read_only_fields = ['appointment','user','healthcare_provider']

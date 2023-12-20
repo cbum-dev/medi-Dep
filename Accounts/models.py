@@ -41,7 +41,3 @@ class User(models.Model):
     phone = models.CharField(max_length=15,null=False,unique=True)
     about = models.TextField(default = " ")
 
-
-
-
-

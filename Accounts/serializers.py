@@ -110,3 +110,8 @@ class AUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['name', 'phone', 'about']
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
