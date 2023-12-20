@@ -31,10 +31,25 @@ class HelpCenter(models.Model):
     def __str__(self):
         return self.user.username
     
-class HelpCenterComment(models.Model):
+class HelpCenterComments(models.Model):
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     problem = models.ForeignKey(HelpCenter,on_delete=models.CASCADE)
     comment = models.TextField()
-
+    date = models.DateField(auto_now_add=True)
+    
     def __str__(self):
         return self.comment
+
+class ChatRoom(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self) :
+        return self.name
+class Message(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    chat_room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
+    content = models.TextField(default = "")
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self) :
+        return self.content

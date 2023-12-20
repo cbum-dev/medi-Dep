@@ -5,8 +5,8 @@ from rest_framework import generics
 from Accounts.permissions import IsOwner
 from rest_framework.response import Response
 from rest_framework import viewsets
-from .models import Blog,BlogLike
-from .serializer import BlogCreateSerializer,BlogSerializer,BlogLikeSerializer,BlogUpdateSerializer,FullBlogSerializer
+from .models import Blog,BlogLike,ChatRoom,Message
+from .serializer import BlogCreateSerializer,BlogSerializer,BlogLikeSerializer,BlogUpdateSerializer,FullBlogSerializer,ChatRoomSerializer,MessageCreateSerializer,MessageViewSerializer
 from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly,BasePermission
 class BlogCreate(generics.CreateAPIView):
     serializer_class = BlogCreateSerializer
@@ -66,16 +66,17 @@ class BlogLike(generics.CreateAPIView):
         serializer.save(user=self.request.user, blog_id=self.kwargs['blog_id'])
 
 from rest_framework import generics
-from .models import HelpCenter, HelpCenterComment
-from .serializer import HelpCenterSerializer, HelpCenterCommentSerializer
+from .models import HelpCenter, HelpCenterComments
+from .serializer import HelpCenterSerializer, HelpCenterCommentSerializer,HelpCenterViewCreateSerializer,HelpCenterCommentCreateSerializer
 from rest_framework.permissions import IsAuthenticated
 
 class HelpCenterListCreateView(generics.ListCreateAPIView):
     queryset = HelpCenter.objects.all()
-    serializer_class = HelpCenterSerializer
+    serializer_class = HelpCenterViewCreateSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
+        # print(self.request.user.id)
         serializer.save(user=self.request.user)
 
 class HelpCenterDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -84,16 +85,54 @@ class HelpCenterDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated,IsOwnerOrReadOnlyForComments]
 
 class HelpCenterCommentListCreateView(generics.ListCreateAPIView):
-    queryset = HelpCenterComment.objects.all()
-    serializer_class = HelpCenterCommentSerializer
-    permission_classes = [IsAuthenticated]
+
+    serializer_class = HelpCenterCommentCreateSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        help_center_id = self.kwargs['help_center_id']
+        try:
+            help_center = HelpCenter.objects.get(prob_id=help_center_id)
+            return HelpCenterComments.objects.filter(problem=help_center).order_by('-id')
+        except HelpCenter.DoesNotExist:
+            return HelpCenterComments.objects.none()
 
     def perform_create(self, serializer):
         help_center_id = self.kwargs['help_center_id']
-        help_center = HelpCenter.objects.get(prob_id=help_center_id)
-        serializer.save(user=self.request.user, problem=help_center)
+        try:
+            help_center = HelpCenter.objects.get(prob_id=help_center_id)
+            serializer.save(user=self.request.user, problem=help_center)
+        except HelpCenter.DoesNotExist:
+            pass  # Handle the case where the specified HelpCenter does not exist
+
 
 class HelpCenterCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = HelpCenterComment.objects.all()
+    queryset = HelpCenterComments.objects.all()
     serializer_class = HelpCenterCommentSerializer
     permission_classes = [IsAuthenticated,IsOwnerOrReadOnlyForComments]
+
+
+class ChatRoomList(generics.ListCreateAPIView):
+    queryset = ChatRoom.objects.all()
+    serializer_class = ChatRoomSerializer
+
+class MessageList(generics.ListAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageViewSerializer
+
+class MessageDetail(generics.CreateAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        chatroom_id = self.kwargs.get('chatroom_id')
+        user = self.request.user
+        chat_room = ChatRoom.objects.get(pk=chatroom_id)
+        serializer.save(chat_room=chat_room, user=user)
+
+
+class MessageDelete(generics.DestroyAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageViewSerializer
+    permission_classes = [IsOwnerOrReadOnlyForComments]

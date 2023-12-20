@@ -16,4 +16,10 @@ urlpatterns = [
     path('help-center/<int:pk>/', views.HelpCenterDetailView.as_view(), name='help-center-detail'),
     path('help-center/<int:help_center_id>/comments/', views.HelpCenterCommentListCreateView.as_view(), name='help-center-comment-list-create'),
     path('help-center/comments/<int:pk>/', views.HelpCenterCommentDetailView.as_view(), name='help-center-comment-detail'),     
+
+    path('chat-rooms/', views.ChatRoomList.as_view(), name='chat-room-list'),
+    path('messages/', views.MessageList.as_view(), name='message-list'),
+    path('messages/<int:chatroom_id>/', views.MessageDetail.as_view(), name='message-detail'),
+    path('messages-del/<int:pk>/', views.MessageDelete.as_view(), name='message-delete'),
+
 ]

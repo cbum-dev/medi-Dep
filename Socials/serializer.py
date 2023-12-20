@@ -54,7 +54,7 @@ class FullBlogSerializer(serializers.ModelSerializer):
 
 
 from rest_framework import serializers
-from .models import HelpCenter, HelpCenterComment
+from .models import HelpCenter, HelpCenterComments,ChatRoom,Message
 
 class HelpCenterSerializer(serializers.ModelSerializer):
     user = CustomUserSerialiser()
@@ -63,10 +63,41 @@ class HelpCenterSerializer(serializers.ModelSerializer):
         model = HelpCenter
         fields = ['prob_id', 'user', 'problem', 'date']
         read_only_fields = ['prob_id', 'user', 'date']
-
+class HelpCenterViewCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HelpCenter
+        fields = ['prob_id', 'user', 'problem', 'date']
+        extra_kwargs = {
+            'user': {'read_only': True},
+            'date': {'read_only': True},
+        }
 class HelpCenterCommentSerializer(serializers.ModelSerializer):
     user = CustomUserSerialiser()
     class Meta:
-        model = HelpCenterComment
-        fields = ['id','user', 'problem', 'comment']
-        read_only_fields = ['user']
+        model = HelpCenterComments
+        fields = ['id','user', 'problem', 'comment','date']
+        read_only_fields = ['user','date']
+class HelpCenterCommentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HelpCenterComments
+        fields = ['id','user', 'problem', 'comment','date']
+        read_only_fields = ['user','date','problem']
+
+
+class ChatRoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatRoom
+        fields = ('id', 'name')
+
+class MessageViewSerializer(serializers.ModelSerializer):
+    user = CustomUserSerialiser()
+    chat_room = ChatRoomSerializer()
+    class Meta:
+        model = Message
+        fields = ('id', 'user', 'chat_room', 'content', 'timestamp')
+class MessageCreateSerializer(serializers.ModelSerializer):
+    # chat_room = ChatRoomSerializer()
+    class Meta:
+        model = Message
+        fields = ('id', 'user', 'chat_room', 'content', 'timestamp')
+        read_only_fields = ['id','user','timestamp','chat_room']
