@@ -154,15 +154,15 @@ class RecordsViewForProvider(generics.ListAPIView):
 class CreateRecordView(generics.CreateAPIView):
     queryset = HealthcareReport.objects.all()
     serializer_class = HealthCareCreateRecordSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
-    def perform_create(self, serializer):
-        appointment_id = self.kwargs.get('appointment_id')
-        appointment = get_object_or_404(Appointment, pk=appointment_id)
-        if appointment.healthcare_provider.user.id == self.request.user.id:
-            serializer.save(healthcare_provider = appointment.healthcare_provider,user=appointment.user, appointment=appointment)
-        else:
-            raise serializers.ValidationError("Only providers can create health records for their appointments.")
+    # def perform_create(self, serializer):
+    #     appointment_id = self.kwargs.get('appointment_id')
+    #     appointment = get_object_or_404(Appointment, pk=appointment_id)
+    #     if appointment.healthcare_provider.user.id == self.request.user.id:
+    #         serializer.save(healthcare_provider = appointment.healthcare_provider,user=appointment.user, appointment=appointment)
+    #     else:
+    #         raise serializers.ValidationError("Only providers can create health records for their appointments.")
 
 
 class IsHealthcareProvider(permissions.BasePermission):

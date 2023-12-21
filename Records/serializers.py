@@ -55,4 +55,4 @@ class HealthCareCreateRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = HealthcareReport
         fields = "__all__"
-        read_only_fields = ['appointment','user','healthcare_provider']
+        # read_only_fields = ['appointment','user','healthcare_provider']
