@@ -9,6 +9,7 @@ class Appointment(models.Model):
     appointment_datetime = models.DateTimeField()
     is_rescheduled = models.BooleanField(default=False)
     problem = models.TextField(default="Something wrong with my health")
+    is_approved = models.BooleanField(default=False)
     
     def is_upcoming(self):
         return self.appointment_datetime > timezone.now()
@@ -18,10 +19,14 @@ class Appointment(models.Model):
         print(self.user,self.healthcare_provider.user)
         return Appointment.objects.filter(user=self.user, appointment_datetime__gt=timezone.now())
 
-    # def clean(self):
-    #     # Check if the user and healthcare provider are the same
-    #     if self.user == self.healthcare_provider.user:
-    #         raise ValidationError("User and healthcare provider cannot be the same.")
+    def approve_appointment(self):
+        # Additional validation: Only healthcare providers can approve appointments
+        if isinstance(self.healthcare_provider, HealthcareProvider):
+            self.is_approved = True
+            self.save()
+        else:
+            raise ValueError("Only healthcare providers can approve appointments.")
+
 
 
 class HealthcareReport(models.Model):

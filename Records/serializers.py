@@ -27,9 +27,11 @@ class AppointmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BookAppSerializer(serializers.ModelSerializer):
+    # user = UserSerializer()
     class Meta:
         model = Appointment
         fields = ['healthcare_provider','appointment_datetime','problem']
+        # read_only_fields = ['user']
 
 class RescheduleSerializer(serializers.ModelSerializer):
     class Meta:

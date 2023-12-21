@@ -36,7 +36,7 @@ class UserAppointmentsListView(generics.ListAPIView):
 
 
 class UpcomingAppointmentsView(generics.ListAPIView):
-    queryset = Appointment.objects.all()
+    queryset = Appointment.objects.all().order_by('-id')
     serializer_class = AppointmentSerializer
     permission_classes = [IsAuthenticated]
 
@@ -44,6 +44,16 @@ class UpcomingAppointmentsView(generics.ListAPIView):
         return Appointment.objects.filter(
             user=self.request.user.user, appointment_datetime__gt=timezone.now()
         )
+class UpcomingAppointmentsProviderView(generics.ListAPIView):
+    queryset = Appointment.objects.all()
+    serializer_class = AppointmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        print(self.request.user)
+        return Appointment.objects.filter(
+            healthcare_provider=self.request.user.id, appointment_datetime__gt=timezone.now()
+        ).order_by('appointment_datetime')
 
 
 class ProviderAppointmentsView(generics.ListAPIView):
@@ -55,7 +65,7 @@ class ProviderAppointmentsView(generics.ListAPIView):
         print(
             provider
         )  # Get the healthcare provider associated with the authenticated user
-        return Appointment.objects.filter(healthcare_provider=provider)
+        return Appointment.objects.filter(healthcare_provider=provider).order_by('-id')
 
 from django.conf import settings
 
@@ -65,9 +75,9 @@ class AppointmentCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        user = self.request.user.user
+        user = self.request.user.user.user.user
         healthcare_provider = serializer.validated_data['healthcare_provider'].user
-        print(user,healthcare_provider,user.user)
+        # print(user,healthcare_provider,user.user)
         # Check if the user and healthcare_provider are the same CustomUser
         if user.user == healthcare_provider:
             raise serializers.ValidationError("User and healthcare provider cannot be the same.")
@@ -119,6 +129,7 @@ class AppointmentRescheduleView(generics.UpdateAPIView):
         new_appointment_datetime = serializer.validated_data["new_appointment_datetime"]
         appointment.appointment_datetime = new_appointment_datetime
         appointment.is_rescheduled = True
+        appointment.is_approved = False
         appointment.save()
 
         return Response({"detail": "Appointment rescheduled successfully."})
@@ -146,15 +157,40 @@ class CreateRecordView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        # Extract appointment_id from the URL
         appointment_id = self.kwargs.get('appointment_id')
-        
-        # Retrieve the appointment object
         appointment = get_object_or_404(Appointment, pk=appointment_id)
-
-        # Additional validation: Only allow providers to create records for their appointments
         if appointment.healthcare_provider.user.id == self.request.user.id:
-            # Set the user from the associated appointment
             serializer.save(healthcare_provider = appointment.healthcare_provider,user=appointment.user, appointment=appointment)
         else:
             raise serializers.ValidationError("Only providers can create health records for their appointments.")
+
+
+class IsHealthcareProvider(permissions.BasePermission):
+    """
+    Custom permission to check if the user is a healthcare provider.
+    """
+
+    def has_permission(self, request, view):
+        # Check if the user is authenticated and is a healthcare provider
+        return request.user.is_authenticated and hasattr(request.user, 'healthcareprovider')
+
+    def has_object_permission(self, request, view, obj):
+        # Check if the user has permission to access the specific object (if needed)
+        return request.user == obj.healthcare_provider.user
+
+class ApproveAppointmentView(generics.UpdateAPIView):
+    queryset = Appointment.objects.all()
+    serializer_class = AppointmentSerializer
+    permission_classes = [permissions.IsAuthenticated, IsHealthcareProvider]
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Additional validation: Check if the healthcare provider is the owner of the appointment
+        if request.user != instance.healthcare_provider.user:
+            return Response({"detail": "You do not have permission to approve this appointment."}, status=status.HTTP_403_FORBIDDEN)
+
+        instance.is_approved = True
+        instance.save()
+
+        return Response({"detail": "Appointment approved successfully."})
