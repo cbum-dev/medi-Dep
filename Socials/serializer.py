@@ -64,6 +64,16 @@ class HelpCenterSerializer(serializers.ModelSerializer):
         fields = ['prob_id', 'user', 'problem', 'date']
         read_only_fields = ['prob_id', 'user', 'date']
 class HelpCenterViewCreateSerializer(serializers.ModelSerializer):
+    user = CustomUserSerialiser()
+    class Meta:
+        model = HelpCenter
+        fields = ['prob_id', 'user', 'problem', 'date']
+        extra_kwargs = {
+            'user': {'read_only': True},
+            'date': {'read_only': True},
+        }
+class HelpCenterCreateSerializer(serializers.ModelSerializer):
+    # user = CustomUserSerialiser()
     class Meta:
         model = HelpCenter
         fields = ['prob_id', 'user', 'problem', 'date']

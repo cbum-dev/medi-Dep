@@ -6,7 +6,7 @@ from Accounts.permissions import IsOwner
 from rest_framework.response import Response
 from rest_framework import viewsets
 from .models import Blog,BlogLike,ChatRoom,Message
-from .serializer import BlogCreateSerializer,BlogSerializer,BlogLikeSerializer,BlogUpdateSerializer,FullBlogSerializer,ChatRoomSerializer,MessageCreateSerializer,MessageViewSerializer
+from .serializer import BlogCreateSerializer,BlogSerializer,BlogLikeSerializer,BlogUpdateSerializer,FullBlogSerializer,ChatRoomSerializer,MessageCreateSerializer,MessageViewSerializer,HelpCenterCreateSerializer
 from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly,BasePermission
 class BlogCreate(generics.CreateAPIView):
     serializer_class = BlogCreateSerializer
@@ -71,8 +71,16 @@ from .serializer import HelpCenterSerializer, HelpCenterCommentSerializer,HelpCe
 from rest_framework.permissions import IsAuthenticated
 
 class HelpCenterListCreateView(generics.ListCreateAPIView):
-    queryset = HelpCenter.objects.all()
+    queryset = HelpCenter.objects.all().order_by('-prob_id')
     serializer_class = HelpCenterViewCreateSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        # print(self.request.user.id)
+        serializer.save(user=self.request.user)
+class HelpCenterCreateView(generics.CreateAPIView):
+    queryset = HelpCenter.objects.all()
+    serializer_class = HelpCenterCreateSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):

@@ -13,6 +13,8 @@ urlpatterns = [
 
     # path('full/<int:pk>/',BlogDetailView.as_view())        #Feature
     path('help-center/', views.HelpCenterListCreateView.as_view(), name='help-center-list-create'),
+    path('help-center/create/', views.HelpCenterCreateView.as_view(), name='help-center-create'),
+
     path('help-center/<int:pk>/', views.HelpCenterDetailView.as_view(), name='help-center-detail'),
     path('help-center/<int:help_center_id>/comments/', views.HelpCenterCommentListCreateView.as_view(), name='help-center-comment-list-create'),
     path('help-center/comments/<int:pk>/', views.HelpCenterCommentDetailView.as_view(), name='help-center-comment-detail'),     
