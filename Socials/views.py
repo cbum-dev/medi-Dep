@@ -43,6 +43,15 @@ class BlogView(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Set the author of the blog post to the current user
         serializer.save(author=self.request.user)
+        
+class BlogViewPersonal(viewsets.ModelViewSet):
+    queryset = Blog.objects.all()
+    serializer_class = BlogSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        return self.queryset.filter(author=user)
 
 class BlogLikeViewSet(viewsets.ModelViewSet):
     queryset = BlogLike.objects.all()
@@ -118,6 +127,15 @@ class HelpCenterCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = HelpCenterComments.objects.all()
     serializer_class = HelpCenterCommentSerializer
     permission_classes = [IsAuthenticated,IsOwnerOrReadOnlyForComments]
+
+class HelpViewPersonal(viewsets.ModelViewSet):
+    queryset = HelpCenter.objects.all()
+    serializer_class = HelpCenterSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        return self.queryset.filter(user=user)
 
 
 class ChatRoomList(generics.ListCreateAPIView):
