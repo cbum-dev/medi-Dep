@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'Socials',
     'rest_framework',
     'corsheaders',
-    'rest_framework_simplejwt.token_blacklist'
+    'rest_framework_simplejwt.token_blacklist',
+    'ckeditor',
 ]
 
 MIDDLEWARE = [
@@ -77,20 +78,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Medical.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': 'railway',
-#        'USER': 'postgres',
-#        'PASSWORD': '-342daAA2bB-CgbDDCBCcGA5eacc4ADC',
-#        'HOST': 'monorail.proxy.rlwy.net',
-#        'PORT': '31564',
-#     }
-# }
 
 DATABASES = {
     "default": dj_database_url.config(default=DATABASE_URL,conn_max_age=1800)

@@ -1,9 +1,11 @@
 from django.db import models
 from Accounts.models import CustomUser
+from ckeditor.fields import RichTextField
 class Blog(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
-    content = models.TextField()
+    # content = models.TextField()
+    body = RichTextField(default="")
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

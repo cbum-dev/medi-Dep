@@ -18,7 +18,7 @@ class BlogSerializer(serializers.ModelSerializer):
     author = CustomUserSerialiser()
     class Meta:
         model = Blog
-        fields = ['id', 'title', 'content', 'author','likes_count']
+        fields = ['id', 'title', 'body', 'author','likes_count']
 
     def get_likes_count(self, obj):
         return obj.likes_count()
@@ -30,25 +30,25 @@ class BlogSerializer(serializers.ModelSerializer):
         show_full_content = self.context.get('show_full_content', False)
         
         if not show_full_content:
-            representation['content'] = ' '.join(representation['content'].split()[:50])
+            representation['body'] = ' '.join(representation['body'].split()[:50])
             
         return representation
 class BlogCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Blog
-        fields = ['title','content']
+        fields = ['title','body']
 class BlogUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Blog
-        fields = ['id','title','content']
+        fields = ['id','title','body']
 class FullBlogSerializer(serializers.ModelSerializer):
     likes_count = serializers.SerializerMethodField()
     author = CustomUserSerialiser()
     class Meta:
         model = Blog
-        fields = ['id','title','content','author','likes_count']
+        fields = ['id','title','body','author','likes_count']
     def get_likes_count(self, obj):
         return obj.likes_count()
 
