@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import dj_database_url
-DATABASE_URL = "postgresql://postgres:sOlopnapOCSvZFmmxlUyiglfsGkQWZnG@junction.proxy.rlwy.net:36746/railway"
+DATABASE_URL = "postgresql://neondb_owner:npg_J2xBYIlAG8bi@ep-orange-mountain-a8on26gv-pooler.eastus2.azure.neon.tech/neondb?sslmode=require"
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
