@@ -8,15 +8,15 @@ class CustomUser(AbstractUser):
     # phone = models.CharField(max_length=15,unique=True)
     def __str__(self):
         return self.username
-    # def set_password(self, raw_password):
-    #     # Hash the raw password using make_password and store it
-    #     self.password = make_password(raw_password)
+    def set_password(self, raw_password):
+        # Hash the raw password using make_password and store it
+        self.password = make_password(raw_password)
 
-    # def save(self, *args, **kwargs):
-    #     # Hash the password before saving
-    #     if not self.pk:
-    #         self.set_password(self.password)  # Hash password when creating a new user
-    #     super().save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        # Hash the password before saving
+        if not self.pk:
+            self.set_password(self.password)  # Hash password when creating a new user
+        super().save(*args, **kwargs)
 class Specialty(models.Model):
     name = models.CharField(max_length=100)
     desc = models.TextField(default = ' ')
